@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Like;
 use App\Models\Post;
+use App\Notifications\LikeNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,8 +33,13 @@ class LikeController extends Controller
             $like->user_id = $user->id;
             $like->post_id = $post->id;
             $like->save();
+
         }
 
-        return redirect()->back();
+        return response()->json([
+
+            'liked' => !$liked, //いいねは最初falseの状態にしておきたい
+            'like_count' => Like::where('post_id', $post->id)->count(),
+        ]);
     }
 }

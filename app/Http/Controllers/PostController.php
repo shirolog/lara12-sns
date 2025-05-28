@@ -91,7 +91,7 @@ class PostController extends Controller
         $post->user_id = Auth::user()->id;
         $post->save();
 
-        return redirect()->route('posts.show', compact('post'));
+        return redirect()->route('posts.show', compact('post'))->with('success', '掲示板の投稿に成功しました。');
     }
 
 

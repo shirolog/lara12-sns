@@ -21,15 +21,14 @@
     </div> 
 
     {{-- いいねボタン --}}
-    <form action="{{ route('posts.like', $post->id) }}" style="display: inline;" method="post">
-        @csrf
-        <button type="submit" class="btn {{ $post->likes->contains('user_id', Auth()->id()) ? 'btn-danger' : 'btn-outline-danger' }} ">
+    <form action="" style="display: inline;">
+        <button id="likeButton" data-id="{{ $post->id }}" class="btn {{ $post->likes->contains('user_id', Auth()->id()) ? 'btn-danger' : 'btn-outline-danger' }} ">
             {!! $post->likes->contains('user_id', Auth()->id()) ? '<i class="bi bi-heart-fill"></i>' : '<i class="bi bi-heart"></i>' !!} 
         </button>
     </form>
 
     {{-- いいねの数を表示 --}}
-    <p>{{ $post->likes->count() }}件のいいね</p>
+    <p id="likeCount">{{ $post->likes->count() }}件のいいね</p>
 
     {{-- コメント一覧 --}}
     <h3>コメント一覧</h3>
@@ -65,4 +64,40 @@
             {{ $comments->onEachSide(1)->links() }}
         </div>
     @endif
+
+    <script>
+        $(document).on('click', '#likeButton', function(e) {
+
+            e.preventDefault();
+
+            const button = $(this);
+            const likeId = $(this).data('id');
+            const likeCount = $('#likeCount');
+
+            $.ajax({
+                url: '{{ route("posts.like", ":id") }}'.replace(":id", likeId),
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                success: function(response) {
+                    if(response.liked) {
+
+                        button.removeClass('btn-outline-danger').addClass('btn-danger');
+                        button.html('<i class="bi bi-heart-fill"></i>');
+                    }else{
+
+                        button.removeClass('btn-danger').addClass('btn-outline-danger');
+                        button.html('<i class="bi bi-heart"></i>');
+                    }
+
+                    likeCount.text(response.like_count + '件のいいね');
+                },
+                error: function(xhr) {
+                alert('エラーが発生しました。ログインしているか確認してください。');
+                },
+            })
+
+        });
+    </script>
 @endsection
